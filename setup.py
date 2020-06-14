@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Fri Jun 12 22:13:07 2020
-
-@author: alex
-"""
-
 
 import setuptools
 
@@ -13,7 +7,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="scoringapi", # Replace with your own username
+    name="scoringapi",  # Replace with your own username
     version="0.0.1",
     author="AlexandrNikitin3776",
     author_email="snegopad1@gmail.com",
