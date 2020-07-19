@@ -1,18 +1,20 @@
 import hashlib
 import datetime
 import pytest
+import random
+import json
 
 from scoringapi import api
 from scoringapi.store import Store
 
 
-context = {}
-headers = {}
-settings = Store('store')
+pytest.context = {}
+pytest.headers = {}
+pytest.settings = Store('store')
 
 
 def get_response(request):
-    return api.method_handler({"body": request, "headers": headers}, context, settings)
+    return api.method_handler({"body": request, "headers": pytest.headers}, pytest.context, pytest.settings)
 
 
 def set_valid_auth(request):
@@ -91,7 +93,7 @@ class TestScoreRequest:
         assert api.OK == code
         score = response.get("score")
         assert isinstance(score, (int, float)) and score >= 0, arguments
-        assert sorted(context["has"]) == sorted(arguments.keys())
+        assert sorted(pytest.context["has"]) == sorted(arguments.keys())
 
     def test_ok_score_admin_request(self):
         arguments = {"phone": "79175002040", "email": "stupnikov@otus.ru"}
@@ -104,15 +106,15 @@ class TestScoreRequest:
 
 
 class MockStore:
-    def get(self):
+    def get(self, key):
         interests = ["cars", "pets", "travel", "hi-tech", "sport", "music",
                      "books", "tv", "cinema", "geek", "otus"]
-        return random.sample(interests, 2)
+        return json.dumps(random.sample(interests, 2))
 
 
 @pytest.fixture
 def set_mock_store():
-    settings = MockStore()
+    pytest.settings = MockStore()
 
 
 class TestInterestsRequest:
@@ -144,4 +146,4 @@ class TestInterestsRequest:
         assert len(arguments["client_ids"]) == len(response)
         assert all(v and isinstance(v, list) and all(isinstance(i, (bytes, str)) for i in v)
                    for v in response.values())
-        assert context.get("nclients") == len(arguments["client_ids"])
+        assert pytest.context.get("nclients") == len(arguments["client_ids"])
