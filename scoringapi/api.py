@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import abc
+# import abc
 import json
 import datetime
 import logging
@@ -14,6 +14,8 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 import re
 
 from scoringapi import scoring
+from scoringapi.store import Store
+
 
 SALT = "Otus"
 ADMIN_LOGIN = "admin"
@@ -40,6 +42,8 @@ GENDERS = {
     MALE: "male",
     FEMALE: "female",
 }
+
+MAX_ATTEMPTS = 5
 
 
 class Field(object):
@@ -209,9 +213,8 @@ class MetaRequest(type):
 
 class Request(metaclass=MetaRequest):
     context = {}
-    store = None
 
-    def __init__(self, request, ctx=None, store=None):
+    def __init__(self, request, store, ctx=None):
         for atr in self.fields:
             getattr(self, atr).value = request.get(atr, None)
         self.context = ctx
@@ -278,7 +281,7 @@ def check_auth(request):
 
 
 def OnlineScoreHandler(request, is_admin, context, store):
-    requestobj = OnlineScoreRequest(request)
+    requestobj = OnlineScoreRequest(request, store)
     logging.info("Method fields validation.")
     if not requestobj.isvalid():
         return requestobj.errorfields, INVALID_REQUEST
@@ -296,7 +299,7 @@ def OnlineScoreHandler(request, is_admin, context, store):
         return {"score": 42}, OK
 
     return {"score": scoring.get_score(
-            store=None,
+            store,
             phone=requestobj.phone.value,
             email=requestobj.email.value,
             birthday=requestobj.birthday.value,
@@ -307,7 +310,7 @@ def OnlineScoreHandler(request, is_admin, context, store):
 
 
 def ClientsInterestsHandler(request, is_admin, context, store):
-    requestobj = ClientsInterestsRequest(request)
+    requestobj = ClientsInterestsRequest(request, store)
     logging.info("Method fields validation.")
     if not requestobj.isvalid():
         return requestobj.errorfields, INVALID_REQUEST
@@ -319,7 +322,7 @@ def ClientsInterestsHandler(request, is_admin, context, store):
     logging.info('Getting response.')
     result = {}
     for i in requestobj.client_ids.value:
-        result[str(i)] = scoring.get_interests(store=None, cid=i)
+        result[str(i)] = scoring.get_interests(store, cid=i)
     return result, OK
 
 
@@ -355,7 +358,7 @@ class MainHTTPHandler(BaseHTTPRequestHandler):
     router = {
         "method": method_handler
     }
-    store = None
+    store = Store('store')
 
     def get_request_id(self, headers):
         return headers.get('HTTP_X_REQUEST_ID', uuid.uuid4().hex)
