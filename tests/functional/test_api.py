@@ -67,7 +67,7 @@ class TestSuite:
         request = {"account": "horns&hoofs", "login": "h&f", "method": "online_score", "arguments": arguments}
         self.set_valid_auth(request)
         response, code = self.get_response(request)
-        assert api.INVALID_REQUEST == code  # == arguments
+        assert api.INVALID_REQUEST == code
         assert len(response)
 
     @pytest.mark.parametrize('arguments', [
@@ -84,7 +84,7 @@ class TestSuite:
         request = {"account": "horns&hoofs", "login": "h&f", "method": "online_score", "arguments": arguments}
         self.set_valid_auth(request)
         response, code = self.get_response(request)
-        assert api.OK == code  # == arguments
+        assert api.OK == code
         score = response.get("score")
         assert isinstance(score, (int, float)) and score >= 0, arguments
         assert sorted(self.context["has"]) == sorted(arguments.keys())
@@ -110,7 +110,7 @@ class TestSuite:
         request = {"account": "horns&hoofs", "login": "h&f", "method": "clients_interests", "arguments": arguments}
         self.set_valid_auth(request)
         response, code = self.get_response(request)
-        assert api.INVALID_REQUEST == code  # == arguments
+        assert api.INVALID_REQUEST == code
         assert len(response)
 
     @pytest.mark.parametrize('arguments', [
@@ -122,7 +122,7 @@ class TestSuite:
         request = {"account": "horns&hoofs", "login": "h&f", "method": "clients_interests", "arguments": arguments}
         self.set_valid_auth(request)
         response, code = self.get_response(request)
-        assert api.OK == code  # == arguments
+        assert api.OK == code
         assert len(arguments["client_ids"]) == len(response)
         assert all(v and isinstance(v, list) and all(isinstance(i, (bytes, str)) for i in v)
                    for v in response.values())

@@ -43,6 +43,8 @@ GENDERS = {
     FEMALE: "female",
 }
 
+
+STORE_CONNECTION = Store('store')
 MAX_ATTEMPTS = 5
 
 
@@ -358,7 +360,7 @@ class MainHTTPHandler(BaseHTTPRequestHandler):
     router = {
         "method": method_handler
     }
-    store = Store('store')
+    store = STORE_CONNECTION
 
     def get_request_id(self, headers):
         return headers.get('HTTP_X_REQUEST_ID', uuid.uuid4().hex)
